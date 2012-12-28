@@ -39,12 +39,14 @@
 
 speed_t ispeed, ospeed;
 
-enum puertos
+enum ports
 {
 	input_serial,
 	output_serial
 };
 
+/*
+ *
 void
 print_usage()
 {
@@ -59,6 +61,22 @@ print_usage()
 	printf("  -h, --help			Muestra esta ayuda y termina\n");
 
 }
+ *
+ */
+void
+print_usage()
+{
+	printf("Usage: stee [OPTIONS] [INPUT] [OUTPUT] [INPUT FILE] [OUTPUT FILE]\n\
+Makes a Serial Tee between INPUT and OUTPUT.\n\nMandatory arguments for\
+long options are also obligatory for short options.\n\
+  -a, --append			FILES (INPUT AND OUTPUT) are opened on append mode\n\
+  -i, --ispeed			INPUT port speed\n\
+  -o, --ospeed			OUTPUT port speed\n\
+  -s, --speed			INPUT AND OUTPUT ports speed\n\
+  -h, --help			Shows this help and exits\n");
+
+}
+
 
 void
 set_options(int serial_device,
@@ -165,12 +183,12 @@ int open_serial_device(const char* serial_str, speed_t speed)
 	serial_device = open(serial_str, O_RDWR | O_NONBLOCK);
 	if(serial_device > 0)
 	{
-		printf("puerto %s abierto con éxito!! (fd: %i)\n", serial_str,
+		printf("Port %s successfully opened!! (fd: %i)\n", serial_str,
 		       serial_device);
 	}
 	else
 	{
-		snprintf(mensaje_error, 75, "No pude abrir el puerto '%s'", serial_str);
+		snprintf(mensaje_error, 75, "Couldn't open port '%s'", serial_str);
 		perror(mensaje_error);
 		exit(-1);
 	}
@@ -180,7 +198,7 @@ int open_serial_device(const char* serial_str, speed_t speed)
 	{
 		snprintf(mensaje_error,
 		         75,
-		         "Problemas desbloqueando el puerto '%s'",
+		         "Couldn't unlock port '%s'",
 		         serial_str);
 		perror(mensaje_error);
 	}
@@ -190,9 +208,6 @@ int open_serial_device(const char* serial_str, speed_t speed)
 
 int main(int argc, char **argv)
 {
-	//parsear argumentos ¡getopt_long!
-	//opciones: velocidad de entrada, velocidad de salida, otras opciones de los
-	//puertos serie.
 	int c;
 	int digit_optind = 0;
 	char *input_serial_str, *output_serial_str, *ifilename_str, *ofilename_str;
@@ -207,7 +222,10 @@ int main(int argc, char **argv)
 	ifilename_str = SAVE_FILE;
 	ofilename_str = SAVE_FILE;
 	append = APPEND;
-	
+
+	//parsear argumentos ¡getopt_long!
+	//opciones: velocidad de entrada, velocidad de salida, otras opciones de los
+	//puertos serie.
 	while (1) {
 		int this_option_optind = optind ? optind : 1;
 		int option_index = 0;
@@ -281,19 +299,19 @@ int main(int argc, char **argv)
 			switch(i - optind)
 			{
 				case 0:
-					printf("Puerto Entrada: %s\n", argv[i]);
+					printf("Input Port: %s\n", argv[i]);
 					input_serial_str = argv[i];
 					break;
 				case 1:
-					printf("Puerto Salida: %s\n", argv[i]);
+					printf("Output Port: %s\n", argv[i]);
 					output_serial_str = argv[i];
 					break;
 				case 2:
-					printf("Archivo donde guardar entrada: %s\n", argv[i]);
+					printf("File to save input: %s\n", argv[i]);
 					ifilename_str = argv[i];
 					break;
 				case 3:
-					printf("Archivo donde guardar salida: %s\n", argv[i]);
+					printf("File to save output: %s\n", argv[i]);
 					ofilename_str = argv[i];
 					break;
 			}
@@ -307,13 +325,13 @@ int main(int argc, char **argv)
 	oserialfd = open_serial_device (output_serial_str, ospeed);
 	if(append)
 	{
-		printf("Abriendo archivos en modo anexar\n");
+		printf("Opening files in append mode\n");
 		ifile = fopen(ifilename_str, "a+");
 		ofile = fopen(ofilename_str, "a+");
 	}
 	else
 	{
-		printf("Abriendo archivos en modo escribir\n");
+		printf("Opening files in write mode\n");
 		ifile = fopen(ifilename_str, "a+");
 		ofile = fopen(ofilename_str, "w");
 	}
