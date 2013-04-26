@@ -89,10 +89,11 @@ set_options(int serial_device,
 	cfsetispeed(&options, speed);
 	cfsetospeed(&options, speed);
 
-	options.c_cflag |= (CLOCAL | CREAD);
-	options.c_cflag &= ~PARENB;
-	options.c_cflag &= ~CSTOPB;
-	options.c_cflag &= ~CSIZE;
+	options.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
+	                     | INLCR | IGNCR | ICRNL | IXON);
+	options.c_oflag &= ~OPOST;
+	options.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+	options.c_cflag &= ~(CSIZE | PARENB);
 	options.c_cflag |= CS8;
 
 	tcsetattr(serial_device, TCSANOW, &options);
